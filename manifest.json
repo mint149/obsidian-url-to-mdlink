@@ -1,0 +1,9 @@
+{
+  "id": "url-to-mdlink",
+  "name": "URL to Markdown Link",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "Convert URLs on the current line into Markdown links using the page title.",
+  "author": "mint149",
+  "isDesktopOnly": false
+}
