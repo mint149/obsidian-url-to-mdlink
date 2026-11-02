@@ -38,6 +38,21 @@ npm run build   # 型チェック + 本番ビルド
 npm test        # ユニットテスト
 ```
 
+### BRAT でインストール（モバイル含む）
+
+1. コミュニティプラグインから **Obsidian42 - BRAT** をインストールして有効化
+2. BRAT の設定で「Add Beta plugin」を選び、`mint149/obsidian-url-to-mdlink` を入力
+3. 「設定 → コミュニティプラグイン」で **URL to Markdown Link** を有効化
+
+### リリース手順
+
+`manifest.json` の `version` と同じ名前のタグ（`v` なし、例: `0.1.0`）を push すると、GitHub Actions がビルドして `main.js` / `manifest.json` を添付した Release を作成します。
+
+```bash
+npm version patch   # manifest.json / versions.json も更新される
+git push && git push --tags
+```
+
 ### 手動インストール
 
 `main.js` と `manifest.json` を、Vault の `.obsidian/plugins/url-to-mdlink/` にコピーし、「設定 → コミュニティプラグイン」で有効化してください。
