@@ -46,7 +46,7 @@ npm test        # ユニットテスト
 
 ### リリース手順
 
-`manifest.json` の `version` と同じ名前のタグ（`v` なし、例: `0.1.0`）を push すると、GitHub Actions がビルドして `main.js` / `manifest.json` を添付した Release を作成します。
+`manifest.json` の `version` を上げて main に反映すると、GitHub Actions がビルドし、`main.js` / `manifest.json` を添付した Release（タグ名はバージョン、`v` なし）を作成します。同じバージョンの Release が既にある場合は何もしません。
 
 ```bash
 npm version patch   # manifest.json / versions.json も更新される
