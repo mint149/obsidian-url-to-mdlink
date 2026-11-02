@@ -1,0 +1,70 @@
+name: Release
+
+# Publishes a GitHub release (used by BRAT) containing main.js and manifest.json.
+# Runs when main is updated or a tag is pushed. The release is named after the
+# version in manifest.json and is skipped if that release already exists.
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./manifest.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check tag matches manifest version
+        if: github.ref_type == 'tag'
+        run: |
+          if [ "${{ steps.version.outputs.version }}" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match manifest.json version ${{ steps.version.outputs.version }}" >&2
+            exit 1
+          fi
+
+      - name: Check whether the release exists
+        id: exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.version.outputs.version }} already exists; skipping."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.exists.outputs.exists == 'false'
+        run: npm ci
+
+      - if: steps.exists.outputs.exists == 'false'
+        run: npm test
+
+      - if: steps.exists.outputs.exists == 'false'
+        run: npm run build
+
+      - name: Create release
+        if: steps.exists.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" \
+            --target "$GITHUB_SHA" \
+            --title "${{ steps.version.outputs.version }}" \
+            --notes "Release ${{ steps.version.outputs.version }}" \
+            main.js manifest.json
